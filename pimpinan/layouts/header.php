@@ -19,7 +19,7 @@ $pimpinan = $_SESSION['username'];
 $level = $_SESSION['level'];
 $nama = $_SESSION['nama'];
 $id = $_SESSION["id"];
-$foto = $_SESSION["foto"];
+$foto = isset($_SESSION["foto"]) ? $_SESSION["foto"] : '';
 
 // Fungsi tanggal Indonesia
 function tgl_indo($tanggal) {
@@ -68,6 +68,30 @@ if (!isset($title)) {
 
     <!-- DataTables -->
     <link rel="stylesheet" href="../assets/dist/dataTables/jquery.dataTables.min.css" />
+    
+    <style>
+        /* Tambahan CSS untuk memastikan layout tidak broken */
+        body {
+            min-height: 100vh;
+        }
+        
+        .content {
+            min-height: calc(100vh - 200px);
+        }
+        
+        /* Fix untuk chart container */
+        #barChartKelas {
+            max-height: 400px !important;
+            height: 400px !important;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            max-height: 400px;
+            overflow: hidden;
+        }
+    </style>
 </head>
 <!-- END: Head -->
 

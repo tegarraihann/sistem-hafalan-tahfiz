@@ -20,8 +20,8 @@ $query = mysqli_query($koneksi, $sql);
 
 while ($row = mysqli_fetch_assoc($query)) {
     $kelas_labels[] = $row['nama_kelas'];
-    $hafalan_ulang[] = (int)$row['ulang'];
-    $hafalan_tidak_ulang[] = (int)$row['tidak_ulang'];
+    $hafalan_ulang[] = (int) $row['ulang'];
+    $hafalan_tidak_ulang[] = (int) $row['tidak_ulang'];
 }
 ?>
 
@@ -32,7 +32,8 @@ while ($row = mysqli_fetch_assoc($query)) {
             <div class="grid grid-cols-12 gap-6">
                 <!-- BEGIN: General Report -->
                 <div class="col-span-12 mt-6 -mb-6 intro-y">
-                    <div class="alert alert-dismissible show box bg-primary text-white flex items-center mb-6" role="alert">
+                    <div class="alert alert-dismissible show box bg-primary text-white flex items-center mb-6"
+                        role="alert">
                         <span class="text-sm font-medium">
                             <h4>Selamat Datang di Sistem Hafalan Tahfizh (SIHAT) Al-Quran</h4>
                         </span>
@@ -115,14 +116,13 @@ while ($row = mysqli_fetch_assoc($query)) {
                 </div>
                 <!-- END: General Report -->
 
-<!-- Diagram Status Hafalan per Kelas -->
-<div class="col-span-12 mt-10">
-    <div class="box p-5">
-        <h2 class="text-lg font-medium mb-5">Status Hafalan Santri per Kelas</h2>
-        <canvas id="barChartKelas" height="120"></canvas>
-    </div>
-</div>
-
+                <!-- Diagram Status Hafalan per Kelas -->
+                <div class="col-span-12 mt-10">
+                    <div class="box p-5">
+                        <h2 class="text-lg font-medium mb-5">Status Hafalan Santri per Kelas</h2>
+                        <canvas id="barChartKelas" height="120"></canvas>
+                    </div>
+                </div>
 
             </div>
         </div>
@@ -130,44 +130,82 @@ while ($row = mysqli_fetch_assoc($query)) {
 </div>
 <!-- END: Content -->
 
+<!-- Load Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
 <script>
-    const ctxKelas = document.getElementById('barChartKelas').getContext('2d');
-    const barChartKelas = new Chart(ctxKelas, {
-        type: 'bar',
-        data: {
-            labels: <?= json_encode($kelas_labels) ?>,
-            datasets: [
-                {
-                    label: 'Mengulang',
-                    data: <?= json_encode($hafalan_ulang) ?>,
-                    backgroundColor: '#DC2626', // merah
-                    borderRadius: 5
-                },
-                {
-                    label: 'Tidak Mengulang',
-                    data: <?= json_encode($hafalan_tidak_ulang) ?>,
-                    backgroundColor: '#16A34A', // biru
-                    borderRadius: 5
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top'
-                },
-                title: {
-                    display: false
-                }
+    // Pastikan Chart.js sudah dimuat
+    document.addEventListener('DOMContentLoaded', function () {
+        // Cek apakah data tersedia
+        const kelasLabels = <?= json_encode($kelas_labels) ?>;
+        const hafalanUlang = <?= json_encode($hafalan_ulang) ?>;
+        const hafalanTidakUlang = <?= json_encode($hafalan_tidak_ulang) ?>;
+
+        // Jika tidak ada data, tampilkan pesan
+        if (kelasLabels.length === 0) {
+            const canvas = document.getElementById('barChartKelas');
+            const ctx = canvas.getContext('2d');
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#64748b';
+            ctx.fillText('Tidak ada data untuk ditampilkan', canvas.width / 2, canvas.height / 2);
+            return;
+        }
+
+        const ctxKelas = document.getElementById('barChartKelas').getContext('2d');
+        const barChartKelas = new Chart(ctxKelas, {
+            type: 'bar',
+            data: {
+                labels: kelasLabels,
+                datasets: [
+                    {
+                        label: 'Mengulang',
+                        data: hafalanUlang,
+                        backgroundColor: '#DC2626', // merah
+                        borderRadius: 5,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Tidak Mengulang',
+                        data: hafalanTidakUlang,
+                        backgroundColor: '#16A34A', // hijau
+                        borderRadius: 5,
+                        borderWidth: 1
+                    }
+                ]
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { stepSize: 1 }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    },
+                    title: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            precision: 0
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 0
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
                 }
             }
-        }
+        });
     });
 </script>
 

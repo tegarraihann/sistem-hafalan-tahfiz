@@ -96,7 +96,7 @@ include 'layouts/navbar.php';
                             <td><?= $data['kelas'] ?></td>
                             <td><?= $data['total_juz'] ?></td>
                             <td><?= $data['tanggal'] ?></td>
-                            <td><?= $data['email_ortu'] ?></td>
+                            <td><?= $data['whatsapp_ortu'] ?></td>
                             <td>
                              <?= $data['status_notif'] == 'Terkirim' 
                              ? '<span style="color:green;">Terkirim</span>' 
