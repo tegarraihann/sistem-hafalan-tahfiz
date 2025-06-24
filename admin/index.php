@@ -117,10 +117,12 @@ while ($row = mysqli_fetch_assoc($query)) {
                 <!-- END: General Report -->
 
                 <!-- Diagram Status Hafalan per Kelas -->
-                <div class="col-span-12 mt-10">
-                    <div class="box p-5">
+                <div class="col-span-12 mt-8">
+                    <div class="box p-5 bg-white rounded-lg shadow-sm border">
                         <h2 class="text-lg font-medium mb-5">Status Hafalan Santri per Kelas</h2>
-                        <canvas id="barChartKelas" height="120"></canvas>
+                        <div class="chart-container" style="height: 400px;">
+                            <canvas id="barChartKelas"></canvas>
+                        </div>
                     </div>
                 </div>
 
@@ -133,80 +135,80 @@ while ($row = mysqli_fetch_assoc($query)) {
 <!-- Load Chart.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
+<!-- Chart Script -->
 <script>
-    // Pastikan Chart.js sudah dimuat
     document.addEventListener('DOMContentLoaded', function () {
-        // Cek apakah data tersedia
-        const kelasLabels = <?= json_encode($kelas_labels) ?>;
-        const hafalanUlang = <?= json_encode($hafalan_ulang) ?>;
-        const hafalanTidakUlang = <?= json_encode($hafalan_tidak_ulang) ?>;
-
-        // Jika tidak ada data, tampilkan pesan
-        if (kelasLabels.length === 0) {
-            const canvas = document.getElementById('barChartKelas');
-            const ctx = canvas.getContext('2d');
-            ctx.font = '16px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillStyle = '#64748b';
-            ctx.fillText('Tidak ada data untuk ditampilkan', canvas.width / 2, canvas.height / 2);
-            return;
-        }
-
-        const ctxKelas = document.getElementById('barChartKelas').getContext('2d');
-        const barChartKelas = new Chart(ctxKelas, {
-            type: 'bar',
-            data: {
-                labels: kelasLabels,
-                datasets: [
-                    {
-                        label: 'Mengulang',
-                        data: hafalanUlang,
-                        backgroundColor: '#DC2626', // merah
-                        borderRadius: 5,
-                        borderWidth: 1
+        try {
+            const ctxKelas = document.getElementById('barChartKelas');
+            if (ctxKelas) {
+                const barChartKelas = new Chart(ctxKelas.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: <?= json_encode($kelas_labels) ?>,
+                        datasets: [
+                            {
+                                label: 'Mengulang',
+                                data: <?= json_encode($hafalan_ulang) ?>,
+                                backgroundColor: '#F43F5E',
+                                borderRadius: 5,
+                                barThickness: 40
+                            },
+                            {
+                                label: 'Tidak Mengulang',
+                                data: <?= json_encode($hafalan_tidak_ulang) ?>,
+                                backgroundColor: '#14B8A6',
+                                borderRadius: 5,
+                                barThickness: 40
+                            }
+                        ]
                     },
-                    {
-                        label: 'Tidak Mengulang',
-                        data: hafalanTidakUlang,
-                        backgroundColor: '#16A34A', // hijau
-                        borderRadius: 5,
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top'
-                    },
-                    title: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1,
-                            precision: 0
-                        }
-                    },
-                    x: {
-                        ticks: {
-                            maxRotation: 45,
-                            minRotation: 0
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top'
+                            },
+                            title: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function (value) {
+                                        return Number.isInteger(value) ? value : '';
+                                    }
+                                },
+                                max: Math.max(...<?= json_encode($hafalan_ulang) ?>, ...<?= json_encode($hafalan_tidak_ulang) ?>) + 2
+                            },
+                            x: {
+                                ticks: {
+                                    maxTicksLimit: 10
+                                }
+                            }
+                        },
+                        layout: {
+                            padding: {
+                                top: 20,
+                                right: 20,
+                                bottom: 20,
+                                left: 20
+                            }
                         }
                     }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
-                }
+                });
             }
-        });
+        } catch (error) {
+            console.error('Error creating chart:', error);
+            // Tampilkan pesan error di halaman jika chart gagal
+            const chartContainer = document.querySelector('.chart-container');
+            if (chartContainer) {
+                chartContainer.innerHTML = '<div class="text-center text-red-500 p-4">Error loading chart: ' + error.message + '</div>';
+            }
+        }
     });
 </script>
-
 <?php include 'layouts/footer.php'; ?>

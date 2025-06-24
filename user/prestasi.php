@@ -69,7 +69,7 @@ include 'layouts/navbar.php';
                             <th class="whitespace-nowrap">Kelas</th>
                             <th class="whitespace-nowrap">Total Juz</th>
                             <th class="whitespace-nowrap">Tanggal</th>
-                            <th class="whitespace-nowrap">Email Orang Tua</th>
+                            <th class="whitespace-nowrap">WhatsApp Orang Tua</th>
                             <th class="whitespace-nowrap">Status Notifikasi</th>
                             <th class="whitespace-nowrap">ACTIONS</th>
                         </tr>
@@ -96,7 +96,7 @@ include 'layouts/navbar.php';
                             <td><?= $data['kelas'] ?></td>
                             <td><?= $data['total_juz'] ?></td>
                             <td><?= $data['tanggal'] ?></td>
-                            <td><?= $data['email_ortu'] ?></td>
+                            <td><?= $data['whatsapp_ortu'] ?></td>
                             <td>
                              <?= $data['status_notif'] == 'Terkirim' 
                              ? '<span style="color:green;">Terkirim</span>' 

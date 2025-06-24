@@ -3,6 +3,20 @@ $title = 'Input Data Hafalan Baru';
 
 include 'layouts/header.php';
 include 'layouts/navbar.php';
+
+// Ambil data santri untuk dropdown
+$query_santri = $koneksi->query("SELECT id, nis, nama FROM tb_santri ORDER BY nama ASC");
+$santri_list = [];
+while ($row = $query_santri->fetch_assoc()) {
+    $santri_list[] = $row;
+}
+
+// Ambil data kelas untuk dropdown
+$query_kelas = $koneksi->query("SELECT id, nama_kelas FROM tb_kelas ORDER BY nama_kelas ASC");
+$kelas_list = [];
+while ($row = $query_kelas->fetch_assoc()) {
+    $kelas_list[] = $row;
+}
 ?>
 
 <!-- BEGIN: Content -->
@@ -12,10 +26,10 @@ include 'layouts/navbar.php';
   </div>
 
   <!-- Notifikasi -->
-  <?php if (!empty($status)): ?>
+  <?php if (!empty($_GET['status'])): ?>
     <div class="intro-y box col-span-12 mt-5">
       <div class="p-5">
-        <?php if ($status === 'sukses'): ?>
+        <?php if ($_GET['status'] === 'sukses'): ?>
           <div class="alert alert-success show mb-2" role="alert">
             ✅ Hafalan berhasil ditambahkan.
           </div>
@@ -39,20 +53,29 @@ include 'layouts/navbar.php';
           <div class="grid grid-cols-12 gap-5">
             <!-- Kolom Kiri -->
             <div class="col-span-12 xl:col-span-6">
-            <div class="mb-3">
-  <label class="form-label">NIS</label>
-  <input type="text" class="form-control" id="nis" name="nis" value="<?= $nis ?? '' ?>" required>
-</div>
+              <div class="mb-3">
+                <label class="form-label">Nama Santri</label>
+                <select class="form-select" id="nama_santri" name="id_santri" required>
+                  <option value="">-- Pilih Santri --</option>
+                  <?php foreach ($santri_list as $santri): ?>
+                    <option value="<?= $santri['id'] ?>" data-nis="<?= $santri['nis'] ?>">
+                      <?= htmlspecialchars($santri['nama']) ?> (NIS: <?= $santri['nis'] ?>)
+                    </option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
 
-<div class="mb-3">
-  <label class="form-label">Nama</label>
-  <input type="text" class="form-control bg-slate-100" id="nama" name="nama" readonly>
-</div>
-
-<div class="mb-3">
-  <label class="form-label">Kelas</label>
-  <input type="text" class="form-control bg-slate-100" id="kelas" name="kelas" readonly>
-</div>
+              <div class="mb-3">
+                <label class="form-label">Kelas</label>
+                <select class="form-select" id="kelas" name="id_kelas" required>
+                  <option value="">-- Pilih Kelas --</option>
+                  <?php foreach ($kelas_list as $kelas): ?>
+                    <option value="<?= $kelas['id'] ?>">
+                      <?= htmlspecialchars($kelas['nama_kelas']) ?>
+                    </option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
 
               <div class="mb-3">
                 <label for="tanggal" class="form-label">Tanggal</label>
@@ -65,6 +88,7 @@ include 'layouts/navbar.php';
               <div class="mb-3">
                 <label for="juz" class="form-label">Juz Dalam Al-Quran</label>
                 <select id="juz" name="juz" class="form-select" required>
+                  <option value="">-- Pilih Juz --</option>
                   <?php for ($i = 1; $i <= 30; $i++): ?>
                     <option value="Juz <?= $i ?>">Juz <?= $i ?></option>
                   <?php endfor; ?>
@@ -74,6 +98,7 @@ include 'layouts/navbar.php';
               <div class="mb-3">
                 <label for="surat" class="form-label">Surat</label>
                 <select id="surat" name="surat" class="form-select" required>
+                    <option value="">-- Pilih Surat --</option>
                     <option value="Al-Fatihah">1. Al-Fatihah (Pembuka)</option>
                     <option value="Al-Baqarah">2. Al-Baqarah (Sapi Betina)</option>
                     <option value="Ali-Imran">3. Ali-Imran (Keluarga Imran)</option>
@@ -199,61 +224,20 @@ include 'layouts/navbar.php';
               <div class="mb-3">
                 <label for="status" class="form-label">Status</label>
                 <select id="status" name="status" class="form-select" required>
-                  <option value="Tidak Mengulang">Tidak Mengulang</option>
-                  <option value="Mengulang">Mengulang</option>
+                  <option value="">-- Pilih Status --</option>
+                  <option value="tidak mengulang">Tidak Mengulang</option>
+                  <option value="mengulang">Mengulang</option>
                 </select>
               </div>
             </div>
             <div class="flex justify-end mt-4">
               <button type="submit" class="btn btn-primary w-20 mr-auto">Tambah</button>
-              <!-- <a href="" class="text-danger flex items-center"> <i data-lucide="trash-2" class="w-4 h-4 mr-1"></i> Delete
-              Account </a> -->
             </div>
           </form>
         </div>
       </div>
       <!-- END: Personal Information -->
     </div>
-
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    const nisInput = document.getElementById("nis");
-    const namaInput = document.getElementById("nama");
-    const kelasInput = document.getElementById("kelas");
-
-    // Setiap kali user mengetik NIS
-    nisInput.addEventListener("input", function() {
-      const nis = this.value.trim();
-      if (nis === "") {
-        // kosongkan jika NIS dihapus
-        namaInput.value = "";
-        kelasInput.value = "";
-        return;
-      }
-
-      // Kirim request ke cari_santri.php
-      fetch("hafalanbaru_app/cari_santri.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: "idsantri=" + encodeURIComponent(nis)
-      })
-      .then(res => {
-        if (!res.ok) throw new Error("HTTP error " + res.status);
-        return res.json();
-      })
-      .then(data => {
-        // jika data ada, isi; jika tidak, kosongkan
-        namaInput.value  = data.nama  || "";
-        kelasInput.value = data.kelas || "";
-      })
-      .catch(err => {
-        console.error("Fetch error:", err);
-        namaInput.value = "";
-        kelasInput.value = "";
-      });
-    });
-  });
-  </script>
 
 <?php
 include 'layouts/footer.php';
